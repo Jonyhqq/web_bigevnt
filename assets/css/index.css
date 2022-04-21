@@ -1,0 +1,15 @@
+.user-info {
+    height: 60px;
+    line-height: 60px;
+    text-align: center;
+}
+
+.user-info img {
+    height: 40px;
+    width: 40px;
+}
+
+.layui-nav-tree i {
+    font-size: 18px;
+    margin-right: 5px;
+}
