@@ -1,0 +1,62 @@
+body {
+    background-image: url(/assets/images/login_bg.jpg);
+    /* 完全覆盖body */
+    background-size: cover;
+}
+
+.login-reg {
+    width: 400px;
+    height: 310px;
+    background-color: white;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* margin-left: -200px;
+    margin-top: -155px; */
+    /* 利用css3里的平移 */
+    transform: translate(-50%, -50%);
+}
+
+.login-reg .title {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.login-reg .layui-form-item {
+    padding: 0 30px;
+    position: relative;
+}
+
+.login-reg .layui-form-item i {
+    position: absolute;
+    top: 8px;
+    left: 40px;
+}
+
+.login-reg .layui-form-item input {
+    padding-left: 30px;
+}
+
+.go-zhuce {
+    position: absolute;
+    height: 20px;
+    width: 100%;
+    padding: 0 30px;
+    box-sizing: border-box;
+}
+
+.go-zhuce a {
+    float: right;
+}
+
+.go-denglu {
+    position: absolute;
+    height: 20px;
+    width: 100%;
+    padding: 0 30px;
+    box-sizing: border-box;
+}
+
+.go-denglu a {
+    float: right;
+}
