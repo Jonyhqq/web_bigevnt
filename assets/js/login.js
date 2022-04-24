@@ -20,7 +20,7 @@ form.verify({
     password: [
         /^[\S]{6,12}$/, '密码必须6到12位，且不能出现空格'
     ],
-    // 校验两次密码书否一致
+    // 校验两次密码是否一致
     repwd: function(value) {
         let pwd = $('.login-box-2 [name=password]').val()
         if (pwd != value) {
@@ -80,7 +80,8 @@ $('#form-box').on('submit', function(e) {
                 console.log(demo.token)
 
                 // 将独立成功获取的token值保存到本地存储localStorage中
-                localStorage.setItem('token', demo.token)
+                let token = JSON.stringify(demo.token)
+                localStorage.setItem('token', token)
                     // 跳转至首页
                 location.href = '/index.html'
 
