@@ -17,6 +17,7 @@ function getUserInfo() {
                 // let username = res.data.username
                 // let nickname = res.data.nickname
                 // let email = res.data.email
+            $('input[name="id"]').val(res.data.id)
             $('input[name="username"]').val(res.data.username)
             $('input[name="nickname"]').val(res.data.nickname)
             $('input[name="email"]').val(res.data.email)
@@ -39,7 +40,11 @@ $('.layui-form').on('submit', function(e) {
         headers: {
             Authorization: token
         },
-        data: $(this).serialize(), // serialize()  快速获取表单的值
+        data: {
+            id: $('input[name="id"]').val(),
+            nickname: $('input[name="nickname"]').val(),
+            email: $('input[name="email"]').val()
+        }, // serialize()  快速获取表单的值
         success: function(res) {
             console.log(res)
             if (res.status != 0) {
@@ -47,7 +52,8 @@ $('.layui-form').on('submit', function(e) {
             } else {
                 layer.msg('更改用户信息成功！')
                     // 再调用父页面中的方法在首页头像旁重新渲染新更改的用户昵称
-                window.parent.getnickname()
+                window.parent.getuser()
+
             }
         }
 

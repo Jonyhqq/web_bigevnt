@@ -42,7 +42,7 @@ $(function() {
             },
             success: function(res) {
                 console.log(res)
-                if (status != 0) {
+                if (res.status != 0) {
                     layer.msg('修改密码失败！')
                 } else {
                     layer.msg('修改密码成功！')

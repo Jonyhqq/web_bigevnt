@@ -11,7 +11,8 @@ function getUserInfo(token, suc, erro) {
         //     'Authorization': token
         // },
         success: function(data) {
-            console.log(data.data)
+
+            let userinfo = data.data
             suc(userinfo)
         },
         erro: function(data) {

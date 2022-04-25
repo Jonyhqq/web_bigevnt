@@ -13,64 +13,69 @@
 
 
     let layer = layui.layer
-        // 上传按钮点击事件
-    $('#btnChooseImage').click(function() {
-            $('#file').click()
-
-
-        })
-        // 为文件选择绑定change事件
-    $('#file').on('change', function(e) {
-        // 获取用户选择的文件
-        let filelist = e.target.files
-        if (filelist.length === 0) {
-            return layer.msg = ('请选择图片！')
-        }
-
-        // 1 拿到用户选择的文件
-        let file = e.target.files[0]
-
-        // 2 根据选择的文件， 创建一个对应的 URL 地址：
-        let newImgURL = URL.createObjectURL(file)
-
-        // 3 先销毁旧的裁剪区域，再重新设置图片路径，之后再创建新的裁剪区域：
-        $image
-            .cropper('destroy') // 销毁旧的裁剪区域
-            .attr('src', newImgURL) // 重新设置图片路径
-            .cropper(options) // 重新初始化裁剪区域
-
-
-
-    })
-
     let token = JSON.parse(localStorage.getItem('token'))
-        // 为确定按钮绑定事件
-    $('#btnUpload').on('click', function() {
-
-        // 4.将裁剪后的图片，输出为 base64 格式的字符串
-        var dataURL = $image
-            .cropper('getCroppedCanvas', { // 创建一个 Canvas 画布
-                width: 100,
-                height: 100
-            })
-            .toDataURL('image/png') // 将 Canvas 画布上的内容，转化为 base64 格式的字符串
 
 
-        $.ajax({
-            url: '/my/update/avatar',
-            method: 'POST',
-            headers: {
-                Authorization: token
-            },
-            success: function(res) {
-                console.log(res)
-                if (res.status != 0) {
-                    return layer.msg('修改头像失败')
-                } else {
-                    layer.msg('修改头像成功')
-                    window.parent.getnickname()
-                }
+
+    $('#btnChooseImage').click(function() {
+        // 一.上传按钮点击事件
+        $('#file').click()
+
+        // 二.为文件选择绑定change事件
+        $('#file').on('change', function(e) {
+            // 获取用户选择的文件
+            let filelist = e.target.files
+            if (filelist.length === 0) {
+                return layer.msg = ('请选择图片！')
             }
+
+            // 1 拿到用户选择的文件
+            let file = e.target.files[0]
+
+            // 2 根据选择的文件， 创建一个对应的 URL 地址：
+            let newImgURL = URL.createObjectURL(file)
+
+            // 3 先销毁旧的裁剪区域，再重新设置图片路径，之后再创建新的裁剪区域：
+            $image
+                .cropper('destroy') // 销毁旧的裁剪区域
+                .attr('src', newImgURL) // 重新设置图片路径
+                .cropper(options) // 重新初始化裁剪区域
+
+
         })
 
+
+        // 三.为确定按钮绑定事件
+        $('#btnUpload').on('click', function() {
+
+            // 4.将裁剪后的图片，输出为 base64 格式的字符串
+            let dataURL = $image
+                .cropper('getCroppedCanvas', { // 创建一个 Canvas 画布
+                    width: 100,
+                    height: 100
+                })
+                .toDataURL('image/png') // 将 Canvas 画布上的内容，转化为 base64 格式的字符串
+
+
+            $.ajax({
+                url: '/my/update/avatar',
+                method: 'POST',
+                data: {
+                    avatar: dataURL
+                },
+                headers: {
+                    Authorization: token
+                },
+                success: function(res) {
+                    if (res.status != 0) {
+                        return layer.msg('修改头像失败')
+                    } else {
+                        layer.msg('修改头像成功')
+                        console.log(res)
+                        window.parent.getuser()
+                    }
+                }
+            })
+
+        })
     })

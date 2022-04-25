@@ -1,17 +1,20 @@
 let token = localStorage.getItem('token')
 token = JSON.parse(token)
+let layer = layui.layer
 
 ;
 (function() {
     if (token) {
-        getUserInfo(token, function(data) {
-            let name = data.data.username
-            let user_pic = data.data.user_pic
+        getUserInfo(token, function(res) {
+            let name = res.nickname || res.username
+            let user_pic = res.user_pic
             $('.user-info span').html(name)
             if (user_pic === null) {
-                $('.user-info img').attr('src', '//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg')
-                $('.layui-layout-right li:nth-child(1) a img').attr('src', '//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg')
+                $('.layui-nav-img').attr('src', '//tva1.sinaimg.cn/crop.0.0.118.118.180/5db11ff4gw1e77d3nqrv8j203b03cweg.jpg')
+            } else {
+                $('.layui-nav-img').attr('src', user_pic)
             }
+
         }, function(data) {})
 
     } else {
@@ -40,8 +43,9 @@ token = JSON.parse(token)
 }());
 
 
-// 显示头像旁边的昵称
-function getnickname() {
+
+// //渲染用户信息函数
+function getuser() {
     $.ajax({
         url: '/my/userinfo',
         method: 'GET',
@@ -49,18 +53,37 @@ function getnickname() {
             Authorization: token
         },
         success: function(res) {
-            console.log(res.data)
-            let nickname = res.data.nickname
-            console.log(nickname)
-            $('.user-info span').html(nickname)
+            if (res.status != 0) {
+                return layer.msg('获取用户信息失败！')
+            } else {
+
+                renderAvater(res.data)
+
+            }
+
         }
 
     })
 
 }
 
-(function() {
 
-    getnickname()
 
-}())
+// 渲染用户头像级名称函数
+function renderAvater(user) {
+
+    // 获取用户的名称
+    let name = user.nickname || user.username
+    console.log(name)
+    console.log(user.nickname)
+    console.log(user.username)
+        // 设置欢迎的文本
+    $('.user-info span').html(name)
+    console.log($('.user-info span').html())
+        // 渲染用户的头像
+    if (user.user_pic !== null) {
+        $('.layui-nav-img').attr('src', user.user_pic)
+    }
+
+
+}
