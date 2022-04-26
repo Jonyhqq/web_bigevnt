@@ -56,7 +56,6 @@ function getuser() {
             if (res.status != 0) {
                 return layer.msg('获取用户信息失败！')
             } else {
-
                 renderAvater(res.data)
 
             }
@@ -66,8 +65,6 @@ function getuser() {
     })
 
 }
-
-
 
 // 渲染用户头像级名称函数
 function renderAvater(user) {

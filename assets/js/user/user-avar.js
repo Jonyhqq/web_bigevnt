@@ -10,8 +10,6 @@
         // 1.3 创建裁剪区域
     $image.cropper(options)
 
-
-
     let layer = layui.layer
     let token = JSON.parse(localStorage.getItem('token'))
 
