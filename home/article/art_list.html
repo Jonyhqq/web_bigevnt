@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/assets/lib/layui/css/layui.css">
+    <link rel="stylesheet" href="/assets/css/article/art_list.css">
+    <title>文章列表</title>
+</head>
+
+<body>
+    <div class="layui-card">
+        <div class="layui-card-header">文章列表</div>
+        <div class="layui-card-body">
+
+            <!-- 筛选区域 -->
+            <form class="layui-form" id="form-search">
+
+                <div class="layui-form-item layui-inline">
+                    <select name="cate_id"></select>
+                </div>
+
+                <div class="layui-form-item layui-inline">
+                    <select name="state">
+                        <option value="">所有状态</option>
+                        <option value="已发布">已发布</option>
+                        <option value="草稿">草稿</option>
+                      </select>
+                </div>
+
+                <div class="layui-form-item layui-inline">
+                    <button class="layui-btn" lay-submit lay-filter="formDemo">筛选</button>
+                </div>
+            </form>
+
+            <!-- 列表区域 -->
+            <table class="layui-table">
+                <colgroup>
+                    <col>
+                    <col width="150">
+                    <col width="150">
+                    <col width="150">
+                    <col width="150">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th>文章标题</th>
+                        <th>分类</th>
+                        <th>发表时间</th>
+                        <th>状态</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+
+            </table>
+
+            <!-- 分页区域 -->
+            <div id="pageBox"></div>
+
+        </div>
+    </div>
+
+
+
+</body>
+
+</html>
+<script src="/assets/lib/jquery.js"></script>
+<script src="/assets/lib/layui/layui.all.js"></script>
+<script src="/assets/js/baseAPI.js"></script>
+<script src="/assets/lib/template-web.js"></script>
+<script src="/assets/js/article/art_list.js"></script>
+
+<!-- 列表数据的模板引擎 -->
+<script type="text/html" id="tpl-table">
+    {{each data}}
+    <tr>
+        <td>{{$value.title}}</td>
+        <td>{{$value.cate_name}}</td>
+        <td>{{$value.pub_date|dataFormt}}</td>
+        <td>{{$value.state}}</td>
+        <td>
+            <button type="button" class="layui-btn layui-btn-sm">编辑</button>
+            <button type="button" class="layui-btn layui-btn-danger layui-btn-sm btn-deleta" data-id={{$value.Id}}>删除</button>
+        </td>
+    </tr>
+    {{/each}}
+
+</script>
+
+<!-- 文章分类的模板引擎 -->
+<script type="text/html" id="tpl-Cate">
+    <option value="">所有分类</option>
+    {{each data}}
+    <option value={{$value.Id}}>{{$value.name}}</option>
+    {{/each}}
+</script>
+
+
+<script>
+    // 定义查询参数对象q
+    let q = {
+        pagenum: 1, // 页码值
+        pagesize: 2, // 每页显示多少条数据
+        cate_id: '', // 文章分类的 Id
+        state: '' // 文章的状态，可选值有：已发布、草稿
+    }
+
+    let layer = layui.layer
+    let form = layui.form
+    let laypage = layui.laypage;
+    let token = JSON.parse(localStorage.getItem('token'))
+
+    // 定义美化时间的过滤器
+    template.defaults.imports.dataFormt = function(data) {
+        const dt = new Date(data)
+
+        var y = padZero(dt.getFullYear())
+        var m = padZero(dt.getMonth() + 1)
+        var d = padZero(dt.getDate())
+
+        var hh = padZero(dt.getHours())
+        var mm = padZero(dt.getMinutes())
+        var ss = padZero(dt.getSeconds())
+
+        return y + '-' + m + '-' + d + '-' + hh + ':' + mm + ':' + ss
+
+    }
+
+    // 封装一个时间补零函数
+    function padZero(n) {
+        return n > 9 ? n : '0' + n
+    }
+
+
+    // 封装获取文章列表的函数
+    function initTable() {
+        $.ajax({
+            url: '/my/article/list',
+            method: 'GET',
+            headers: {
+                Authorization: token
+            },
+            data: q,
+            success: function(res) {
+                if (res.status !== 0) {
+                    return layer.msg('获取文章列表失败!')
+                }
+                let htmlStr = template('tpl-table', res)
+                $('tbody').html(htmlStr)
+                    // 调用分页的方法
+                renderPage(res.total)
+
+            }
+        })
+
+    }
+    initTable()
+
+    // 封装获取文章分类的函数
+    function initCate() {
+        $.ajax({
+            url: '/my/article/cates',
+            method: 'GET',
+            headers: {
+                Authorization: token
+            },
+            success: function(res) {
+                if (res.status !== 0) {
+                    return layer.msg('获取文章分类失败！')
+                }
+                let htmlStr = template('tpl-Cate', res)
+                $('[name=cate_id]').html(htmlStr)
+                    // 用 form.rende方法重新渲染页面
+                form.render()
+
+            }
+        })
+    }
+    initCate()
+
+
+    // 为筛选按钮绑定事件
+    $('#form-search').on('submit', function(e) {
+        e.preventDefault()
+            // 获取两个可选表单的value值
+        let cate_id = $('[name=cate_id]').val()
+        let state = $('[name=state]').val()
+            // 把值赋给对象q里边的元素
+        q.cate_id = cate_id
+        q.state = state
+            // 重新发送ajax请求渲染页面
+        initTable()
+    })
+
+
+
+    // 定义渲染分页的方法
+    function renderPage(total) {
+        //调用layui的分页内置对象
+        laypage.render({
+            elem: 'pageBox', //注意，这里是ID，不用加 # 号
+            count: total, //数据总数，从服务端得到
+            limit: q.pagesize, // 每页显示几条数据
+            curr: q.pagenum, // 设置默认被选中的分页
+            layout: ['count', 'limit', 'prev', 'page', 'next', 'skip'],
+            limits: [2, 3, 5, 6, 10],
+            // 调用jump回调函数的几种种方式：
+            // 1. 分页发送切换的时候，触发jump的回调函数     
+            // 2.只要调用了laypage.render()方法，就会触发jump回调
+            // 3.切换分页条数limits也会触发jump回调
+            jump: function(obj, first) {
+                // console.log(obj.curr); //值是当前页，以便向服务端请求对应页的数据。
+                // console.log(first) // first的值默认是true，当分页被点击时值变为underfine
+
+                // 把最新的页码值赋到q查询对象里的pagenum上
+                q.pagenum = obj.curr
+                q.pagesize = obj.limit // obj.limit  分页条数，也就是每页显示多少数据
+                    // 判断，如果first的值为true，证明是方式2触发的jump回调，这时就不调用渲染表格函数，否则会发生死循环
+                    // 当分页被点击时，first的值变为underfine，这是可以调用渲染表格函数
+                if (!first) {
+                    initTable()
+                }
+
+
+            }
+        });
+
+    }
+
+    // 给删除按钮绑定事件
+    // 用事件委托的方式
+    $('tbody').on('click', '.btn-deleta', function() {
+
+        // 获取当前页面删除按钮的个数
+        let len = $('.btn-deleta').length
+        console.log(len)
+            // 1.获取文章的id
+        let id = $(this).attr('data-id')
+
+        // 2.询问用户是否要删除，用leyui的内置对象
+        layer.confirm('确定删除吗?', {
+            icon: 3,
+            title: '提示'
+        }, function(index) {
+            // 发送Ajax请求
+            $.ajax({
+                url: '/my/article/delete/' + id,
+                method: 'GET',
+                headers: {
+                    Authorization: token
+                },
+                success: function(res) {
+                    if (res.status !== 0) {
+                        return layer.msg('删除文章失败！')
+                    }
+                    layer.msg('删除文章成功！')
+
+                    // 当数据删除完成后, 判断当前页是否还有剩余数据, 如果没有就让页码值 - 1,再重新调用initTable()方法
+                    if (len === 1) {
+                        // 页码值最小必须是1,假如当前页码值为1时,不能减1
+                        q.pagenum = q.pagenum === 1 ? 1 : q.pagenum - 1
+                    }
+                    // 调用渲染表格方法重新渲染
+                    initTable()
+
+                }
+
+            })
+
+            // 退出弹出层
+            layer.close(index);
+        });
+
+    })
+</script>
